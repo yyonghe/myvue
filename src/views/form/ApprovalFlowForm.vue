@@ -197,9 +197,6 @@ export default {
     remoteMethod(query) {
       this.operatorOptionLoading = true
       this.options = []
-      /*if (query !== '') {
-        this.iform.approvals[0].operators.push(query)
-      }*/
       this.operatorOptionLoading = false
     }
   }
