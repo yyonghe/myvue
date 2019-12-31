@@ -27,6 +27,9 @@
           style="width:100%"
         >
           <el-option v-for="item in operatorOptions" :key="item" :value="item" />
+
+
+          
         </el-select>
       </el-form-item>
       <el-form-item label="审批关系">
