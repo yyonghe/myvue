@@ -30,15 +30,24 @@
       </el-table-column>
       <el-table-column label="审批流程">
         <template slot-scope="scope">
-          <el-steps :active="-1" space="20%">
+          <el-steps :active="-1" space="25%">
             <el-step
               v-for="(item,index) in scope.row.approvals"
               :key="index"
               :description="handleOperators(item)"
-              icon="el-icon-right"
               status="process"
             />
           </el-steps>
+        </template>
+      </el-table-column>
+      <el-table-column label="管理员" width="180">
+        <template slot-scope="scope">
+          <span class="notifier">
+            <el-tooltip effect="dark" :content="formatMailto(scope.row.admins)" placement="top-start">
+              <i class="el-icon-info" />
+            </el-tooltip>
+            {{ formatMailto(scope.row.admins) }}
+          </span>
         </template>
       </el-table-column>
       <el-table-column label="审批结果知会人员" width="180">

@@ -8,6 +8,7 @@ const approvalFlowList = Mock.mock({
     name: '@cword(8,10)',
     desc: '@cword(40, 60)',
     author: '@word(5,8)',
+    'admins|5-10': ['@word(5,8)'],
     'mailto|5-10': ['@word(5,8)'],
     'approvals|2-4': [
       {
