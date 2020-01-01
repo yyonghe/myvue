@@ -78,9 +78,9 @@
       :visible.sync="dialogFormVisible"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
-      :show-close="false"
+      :before-close="closeDialog"
     >
-      <ApprovalFlowForm :form="form" @closeModifyFlow="closeModifyFlow" />
+      <ApprovalFlowForm ref="approvalFlowForm" :form="form" @closeModifyFlow="closeModifyFlow" />
     </el-dialog>
   </div>
 </template>
@@ -109,7 +109,6 @@ export default {
     fetchData() {
       this.listLoading = true
       getApprovalFlowList().then(response => {
-        console.log(response)
         this.list = response.data.items
         this.listLoading = false
       })
@@ -117,6 +116,9 @@ export default {
     modifyFlow(item) {
       this.form = item
       this.dialogFormVisible = true
+    },
+    closeDialog(done) {
+      this.$refs.approvalFlowForm.cancelModifyFlow()
     },
     closeModifyFlow() {
       this.dialogFormVisible = false

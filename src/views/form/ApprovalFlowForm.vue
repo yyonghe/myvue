@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form ref="form" :model="iform" label-width="120px">
+    <el-form ref="form" v-loading="formLoading" :model="iform" label-width="85px">
       <el-form-item label="ID">
         <el-input v-model="iform.id" :disabled="true" />
       </el-form-item>
@@ -127,7 +127,7 @@
       </div>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">Create</el-button>
-        <el-button @click="onCancel()">Cancel</el-button>
+        <el-button @click="cancelModifyFlow()">Cancel</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -135,8 +135,9 @@
 
 <script>
 
-import { getApprovalFlow } from '@/api/approval-flow'
+import { /* newApprovalFlow, */getApprovalFlow, updateApprovalFlow } from '@/api/approval-flow'
 import { formatFlowLevelTitle } from '@/utils/index'
+import { login } from '@/api/user'
 
 export default {
   props: {
@@ -151,9 +152,10 @@ export default {
   },
   data() {
     return {
-      rowLabelSpan: 3,
+      rowLabelSpan: 1,
       operatorOptions: [],
       operatorOptionLoading: false,
+      formLoading: false,
       iform: JSON.parse(JSON.stringify(this.form)),
       activeName: [1, 2, 3, 4, 5, 6, 7, 8, 9]
     }
@@ -161,7 +163,6 @@ export default {
   mounted() {
     if (this.iform.name === '') {
       getApprovalFlow().then(response => {
-        console.log(response)
         this.iform = response.data.item
       }).catch(error => {
         console.log(error)
@@ -170,14 +171,23 @@ export default {
   },
   methods: {
     onSubmit() {
-      this.$message('submit!')
-      this.form = Object.assign(this.form, this.iform)
-      this.$emit('closeModifyFlow')
+      this.formLoading = true
+      // this.$emit('closeModifyFlow')
+      updateApprovalFlow(this.iform).then(response => {
+        this.formLoading = false
+        this.form = Object.assign(this.form, this.iform)
+      })
     },
-    onCancel(formName) {
-      this.$message('onCancel!')
-      this.iform = JSON.parse(JSON.stringify(this.form))
-      this.$emit('closeModifyFlow')
+    cancelModifyFlow() {
+      if (this.formLoading) {
+        this.$message({
+          message: '数据处理中，请稍等...',
+          duration: 1000
+        })
+      } else {
+        this.iform = JSON.parse(JSON.stringify(this.form))
+        this.$emit('closeModifyFlow')
+      }
     },
     handleFlowTitle(index) {
       return formatFlowLevelTitle(index)
@@ -214,6 +224,7 @@ export default {
 .colLabel {
   text-align: right;
   padding-right: 5px;
+  width: 70px;
 }
 .colLabel span {
   line-height: 40px;

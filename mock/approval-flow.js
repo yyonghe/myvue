@@ -1,5 +1,7 @@
 
 import Mock from 'mockjs'
+const defaultSettings = require('../src/settings.js')
+const debug = require('debug')(defaultSettings.projectName + ':mock:approval-flow')
 
 const approvalFlowList = Mock.mock({
   'items|30': [{
@@ -26,6 +28,7 @@ export default [
   {
     url: '/approvalflow/get',
     type: 'get',
+    delay: 3000,
     response: config => {
       var data = approvalFlowList.items
       return {
@@ -50,5 +53,36 @@ export default [
         }
       }
     }
+  },
+
+  {
+    url: '/approvalflow/update',
+    type: 'post',
+    delay: 2000,
+    response: config => {
+      debug('/approvalflow/update config: ', config.body)
+      return {
+        code: 20000,
+        data: {
+          "msg": 'ok'
+        }
+      }
+    }
+  },
+  
+  {
+    url: '/approvalflow/new',
+    type: 'post',
+    response: config => {
+      var data = approvalFlowList.items
+      return {
+        code: 20000,
+        data: {
+          total: data.length,
+          items: data
+        }
+      }
+    }
   }
 ]
+

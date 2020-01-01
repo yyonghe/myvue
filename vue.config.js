@@ -1,6 +1,7 @@
 'use strict'
 const path = require('path')
 const defaultSettings = require('./src/settings.js')
+const debug = require('debug')(defaultSettings.projectName + ':vue.config')
 
 function resolve(dir) {
   return path.join(__dirname, dir)
@@ -31,23 +32,38 @@ module.exports = {
   productionSourceMap: false,
   devServer: {
     port: port,
-    open: true,
+    open: false,
     overlay: {
       warnings: false,
       errors: true
     },
+    setup: function (app, server) {
+      // for Mock & Debug
+      if (process.env.NODE_ENV === 'development') {
+        app.all('/*', function (req, res, next) {
+          debug('Accessing ', req.method, req.originalUrl, req.hostname)
+          next()
+        })
+        // Mock server
+        var ms = require('./mock/mock-server.js')
+        ms(app)
+      }
+    },
     proxy: {
       // change xxx-api/login => mock/login
       // detail: https://cli.vuejs.org/config/#devserver-proxy
+      // mock + 后台调用的方式
+      // 匹配中的走mock
+      // 没有匹配的，直接走远程调用
       [process.env.VUE_APP_BASE_API]: {
-        target: `http://127.0.0.1:${port}/mock`,
+        // logLevel: 'debug',
+        target: `http://localhost:${port}/mock`,
         changeOrigin: true,
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''
         }
       }
-    },
-    after: require('./mock/mock-server.js')
+    }
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that

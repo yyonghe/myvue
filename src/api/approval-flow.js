@@ -15,3 +15,20 @@ export function getApprovalFlowList(params) {
     params
   })
 }
+
+export function updateApprovalFlow(data) {
+  console.log('login', data)
+  return request({
+    url: '/approvalflow/update',
+    method: 'post',
+    data
+  })
+}
+
+export function newApprovalFlow(data) {
+  return request({
+    url: '/approvalflow/new',
+    method: 'post',
+    data
+  })
+}

@@ -102,7 +102,7 @@ export const constantRoutes = [
     children: [
       {
         path: 'new',
-        name: 'Form',
+        name: 'ApprovalFlowForm',
         component: () => import('@/views/form/ApprovalFlowForm'),
         meta: { title: 'Form', icon: 'form' }
       }

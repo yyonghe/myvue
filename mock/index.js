@@ -4,6 +4,8 @@ import { param2Obj } from '../src/utils'
 import user from './user'
 import table from './table'
 import approvalflow from './approval-flow'
+const defaultSettings = require('../src/settings.js')
+const debug = require('debug')(defaultSettings.projectName + ':mock:index')
 
 const mocks = [
   ...user,
@@ -11,7 +13,7 @@ const mocks = [
   ...approvalflow
 ]
 
-// for front mock
+// for front mock 纯前端的mock方式，在入口处加载这个函数
 // please use it cautiously, it will redefine XMLHttpRequest,
 // which will cause many of your third-party libraries to be invalidated(like progress event).
 export function mockXHR() {
@@ -55,16 +57,25 @@ export function mockXHR() {
 }
 
 // for mock server
-const responseFake = (url, type, respond) => {
+const mockItemWrapper = (url, type, delay, respond) => {
   return {
     url: new RegExp(`/mock${url}`),
     type: type || 'get',
     response(req, res) {
-      res.json(Mock.mock(respond instanceof Function ? respond(req, res) : respond))
+      debug('delay', url, delay)  
+      var rspFunc = () => {
+        res.json(Mock.mock(respond instanceof Function ? respond(req, res) : respond))
+      }
+      
+      if (delay != null) {
+        setTimeout(rspFunc, delay)
+      } else {
+        rspFunc()
+      }
     }
   }
 }
 
 export default mocks.map(route => {
-  return responseFake(route.url, route.type, route.response)
+  return mockItemWrapper(route.url, route.type, route.delay, route.response)
 })
