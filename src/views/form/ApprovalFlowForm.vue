@@ -127,7 +127,7 @@
       </div>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">Create</el-button>
-        <el-button @click="cancelModifyFlow()">Cancel</el-button>
+        <el-button v-show="cancelVisiable" @click="cancelModifyFlow()">Cancel</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -137,7 +137,6 @@
 
 import { /* newApprovalFlow, */getApprovalFlow, updateApprovalFlow } from '@/api/approval-flow'
 import { formatFlowLevelTitle } from '@/utils/index'
-import { login } from '@/api/user'
 
 export default {
   props: {
@@ -148,14 +147,15 @@ export default {
           name: ''
         }
       }
-    }
+    },
+    cancelVisiable: Boolean
   },
   data() {
     return {
       rowLabelSpan: 1,
       operatorOptions: [],
       operatorOptionLoading: false,
-      formLoading: false,
+      formLoading: true,
       iform: JSON.parse(JSON.stringify(this.form)),
       activeName: [1, 2, 3, 4, 5, 6, 7, 8, 9]
     }
@@ -164,10 +164,15 @@ export default {
     if (this.iform.name === '') {
       getApprovalFlow().then(response => {
         this.iform = response.data.item
-      }).catch(error => {
-        console.log(error)
+        this.formLoading = false
+      }).catch(() => {
+        this.formLoading = false
       })
+    } else {
+      this.formLoading = false
     }
+    //
+    // this.formLoading = false
   },
   methods: {
     onSubmit() {
@@ -176,6 +181,8 @@ export default {
       updateApprovalFlow(this.iform).then(response => {
         this.formLoading = false
         this.form = Object.assign(this.form, this.iform)
+      }).catch(() => {
+        this.formLoading = false
       })
     },
     cancelModifyFlow() {

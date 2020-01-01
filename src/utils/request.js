@@ -14,6 +14,11 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // do something before request is sent
+    // console.log(config)
+    if (config.params == null) {
+      config.params = {}
+    }
+    config.params._t = new Date().getTime()
 
     if (store.getters.token) {
       // let each request carry token

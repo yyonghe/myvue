@@ -80,7 +80,7 @@
       :close-on-press-escape="false"
       :before-close="closeDialog"
     >
-      <ApprovalFlowForm ref="approvalFlowForm" :form="form" @closeModifyFlow="closeModifyFlow" />
+      <ApprovalFlowForm ref="approvalFlowForm" :cancelVisiable="true" :form="form" @closeModifyFlow="closeModifyFlow" />
     </el-dialog>
   </div>
 </template>
