@@ -73,12 +73,6 @@ export const constantRoutes = [
         name: 'Tree',
         component: () => import('@/views/tree/index'),
         meta: { title: 'Tree', icon: 'tree' }
-      },
-      {
-        path: 'approvalFlowList',
-        name: 'ApprovalFlowList',
-        component: () => import('@/views/table/ApprovalFlowList'),
-        meta: { title: '审批流程列表', icon: 'table' }
       }
     ]
   },
@@ -97,14 +91,27 @@ export const constantRoutes = [
   },
 
   {
-    path: '/approvalFlowForm',
+    path: '/approvalflow/list',
     component: Layout,
     children: [
       {
-        path: 'new',
-        name: 'ApprovalFlowForm',
+        path: '',
+        name: 'ApprovalFlowList',
+        component: () => import('@/views/table/ApprovalFlowList'),
+        meta: { title: '审批流程列表', icon: 'table' }
+      }
+    ]
+  },
+
+  {
+    path: '/approvalflow/new',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        name: 'NewApprovalFlow',
         component: () => import('@/views/form/ApprovalFlowForm'),
-        meta: { title: 'Form', icon: 'form' }
+        meta: { title: '新建审批流程', icon: 'form' }
       }
     ]
   },

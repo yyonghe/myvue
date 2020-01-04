@@ -64,51 +64,49 @@
                     <el-col :span="rowLabelSpan" class="colLabel">
                       <span>审批人员:</span>
                     </el-col>
-                    <el-col :span="22">
-                      <el-row>
-                        <el-col>
-                          <el-select :v-model="approval.mode">
-                            <el-option label="Leader审批" value="0" />
-                            <el-option label="指定人员审批" value="1" />
-                          </el-select>
-                        </el-col>
-                      </el-row>
-                      <el-row>
-                        <el-col :span="16">
-                          <el-select
-                            v-model="approval.operators"
-                            multiple
-                            remote
-                            filterable
-                            allow-create
-                            placeholder="请选择"
-                            :remote-method="remoteMethod"
-                            :loading="operatorOptionLoading"
-                            value-key="name"
-                            style="width:100%"
-                          >
-                            <el-option v-for="item in operatorOptions" :key="item" :value="item" />
-                          </el-select>
-                        </el-col>
-                        <el-col :span="6" style="margin-left:15px;line-height: 40px;">
-                          <el-radio-group v-model="approval.mode">
-                            <div>
-                              <el-radio :label="'&'">都审批通过生效</el-radio>
-                            </div>
-                            <div style="margin-top: 5px">
-                              <el-radio :label="'|'">任意一人审批通过生效</el-radio>
-                            </div>
-                          </el-radio-group>
-                        </el-col>
-                      </el-row>
+                    <el-col :span="12" style="white-space:nowrap;">
+                      <el-select v-model="approval.mode" @change="handleApprovalModeChange(approval)" style="width:140px;">
+                        <el-option label="Leader审批" :value="0" />
+                        <el-option label="指定人员审批" :value="handleApprovalMode(approval.mode)" />
+                      </el-select>
+                      <span v-if="index==0" v-show="approval.mode==0" style="margin-left: 5px;font-style:italic;font-size: 11px;">*申请人的Leader</span>
+                      <span v-else v-show="approval.mode==0" style="margin-left: 5px;font-style:italic;font-size: 11px;">*{{ handleFlowTitle(index-1) }}人的Leader</span>
                     </el-col>
+                    <div  v-show="approval.mode!=0" style="margin: 45px 0 0 70px;">
+                      <el-col :span="12">
+                        <el-select
+                          v-model="approval.operators"
+                          multiple
+                          remote
+                          filterable
+                          allow-create
+                          placeholder=""
+                          :remote-method="remoteMethod"
+                          :loading="operatorOptionLoading"
+                          value-key="name"
+                          style="width:100%"
+                        >
+                          <el-option v-for="item in operatorOptions" :key="item" :value="item" />
+                        </el-select>
+                      </el-col>
+                      <el-col :span="6" style="margin-left:15px;line-height: 40px;">
+                        <el-radio-group v-model="approval.mode">
+                          <div>
+                            <el-radio :label="1">都审批通过才生效</el-radio>
+                          </div>
+                          <div style="margin-top: 5px">
+                            <el-radio :label="2">任意一人审批通过生效</el-radio>
+                          </div>
+                        </el-radio-group>
+                      </el-col>
+                    </div>
                   </el-row>
                   <el-row class="flowRow">
                     <el-col :span="rowLabelSpan" class="colLabel">
                       <span>结果回调:</span>
                     </el-col>
-                    <el-col :span="12">
-                      <el-select v-model="approval.notify.type">
+                    <el-col :span="6">
+                      <el-select v-model="approval.notify.type" style="width:140px;">
                         <el-option label="不回调" value="0" />
                         <el-option label="HTTP回调" value="1" />
                         <el-option label="TRPC回调" value="2" />
@@ -138,8 +136,11 @@
         </el-row>
       </div>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">Create</el-button>
-        <el-button v-show="cancelVisiable" @click="cancelModifyFlow()">Cancel</el-button>
+        <el-button type="primary" @click="onSubmit">
+          <span v-if="cancelVisiable">提交</span>
+          <span v-else>创建</span>
+        </el-button>
+        <el-button v-show="cancelVisiable" @click="cancelModifyFlow()">取消</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -191,6 +192,13 @@ export default {
     onSubmit() {
       this.formLoading = true
       // this.$emit('closeModifyFlow')
+      var i = 0
+      for (i in this.iform.approvals) {
+        if (this.iform.approvals[i].mode === 0) {
+          this.iform.approvals[i].operators = ['$Leader$']
+        }
+      }
+
       updateApprovalFlow(this.iform).then(response => {
         this.formLoading = false
         this.form = Object.assign(this.form, this.iform)
@@ -215,7 +223,7 @@ export default {
     addFlowNode(item) {
       item.approvals.push({
         operators: [],
-        mode: '|',
+        mode: 0,
         notify: {
           type: '0'
         }
@@ -228,6 +236,19 @@ export default {
       this.operatorOptionLoading = true
       this.options = []
       this.operatorOptionLoading = false
+    },
+    handleApprovalMode(mode) {
+      return mode === 0 ? 1 : mode
+    },
+    handleApprovalModeChange(approval) {
+      var n = []
+      var i = 0
+      for (i in approval.operators) {
+        if (approval.operators[i].toLowerCase() !== '$leader$') {
+          n.push(approval.operators[i])
+        }
+      }
+      approval.operators = n
     }
   }
 }

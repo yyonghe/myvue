@@ -17,7 +17,6 @@ export function getApprovalFlowList(params) {
 }
 
 export function updateApprovalFlow(data) {
-  console.log('login', data)
   return request({
     url: '/approvalflow/update',
     method: 'post',
