@@ -64,31 +64,43 @@
                     <el-col :span="rowLabelSpan" class="colLabel">
                       <span>审批人员:</span>
                     </el-col>
-                    <el-col :span="12">
-                      <el-select
-                        v-model="approval.operators"
-                        multiple
-                        remote
-                        filterable
-                        allow-create
-                        placeholder="请选择"
-                        :remote-method="remoteMethod"
-                        :loading="operatorOptionLoading"
-                        value-key="name"
-                        style="width:100%"
-                      >
-                        <el-option v-for="item in operatorOptions" :key="item" :value="item" />
-                      </el-select>
-                    </el-col>
-                    <el-col :span="6" style="margin-left:15px;line-height: 40px;">
-                      <el-radio-group v-model="approval.mode">
-                        <div>
-                          <el-radio :label="'&'">都审批通过生效</el-radio>
-                        </div>
-                        <div style="margin-top: 5px">
-                          <el-radio :label="'|'">任意一人审批通过生效</el-radio>
-                        </div>
-                      </el-radio-group>
+                    <el-col :span="22">
+                      <el-row>
+                        <el-col>
+                          <el-select :v-model="approval.mode">
+                            <el-option label="Leader审批" value="0" />
+                            <el-option label="指定人员审批" value="1" />
+                          </el-select>
+                        </el-col>
+                      </el-row>
+                      <el-row>
+                        <el-col :span="16">
+                          <el-select
+                            v-model="approval.operators"
+                            multiple
+                            remote
+                            filterable
+                            allow-create
+                            placeholder="请选择"
+                            :remote-method="remoteMethod"
+                            :loading="operatorOptionLoading"
+                            value-key="name"
+                            style="width:100%"
+                          >
+                            <el-option v-for="item in operatorOptions" :key="item" :value="item" />
+                          </el-select>
+                        </el-col>
+                        <el-col :span="6" style="margin-left:15px;line-height: 40px;">
+                          <el-radio-group v-model="approval.mode">
+                            <div>
+                              <el-radio :label="'&'">都审批通过生效</el-radio>
+                            </div>
+                            <div style="margin-top: 5px">
+                              <el-radio :label="'|'">任意一人审批通过生效</el-radio>
+                            </div>
+                          </el-radio-group>
+                        </el-col>
+                      </el-row>
                     </el-col>
                   </el-row>
                   <el-row class="flowRow">
@@ -153,6 +165,7 @@ export default {
   data() {
     return {
       rowLabelSpan: 1,
+      approvalMode: '0',
       operatorOptions: [],
       operatorOptionLoading: false,
       formLoading: true,
