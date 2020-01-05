@@ -36,10 +36,10 @@ function registerRoutes(app, pMockStartIndex, pMockRoutesLength) {
 
   const mockRoutesLength = Object.keys(mocks).length
 
-  // debug('mockRoutesLength, mockLastIndex, mockRoutesLength, tail.length', mockRoutesLength, mockLastIndex, mockRoutesLength, tail.length)
-  // for (i in app._router.stack) {
-  //   debug('registerRoutes state', i, app._router.stack[i].name, app._router.stack[i].regexp.toString().replace('\n',' '), app._router.stack[i].path)
-  // }
+  debug('mockRoutesLength, mockLastIndex, mockRoutesLength, tail.length', mockRoutesLength, mockLastIndex, mockRoutesLength, tail.length)
+  for (i in app._router.stack) {
+    debug('registerRoutes state', i, app._router.stack[i].name, app._router.stack[i].regexp.toString().replace('\n',' '), app._router.stack[i].path)
+  }
 
   return {
     mockRoutesLength: mockRoutesLength,

@@ -1,14 +1,35 @@
 <template>
   <div class="app-container">
-    <el-form ref="form" v-loading="formLoading" :model="iform" label-width="85px">
+    <el-form ref="form" v-loading="formLoading" :model="iform" label-width="95px">
       <el-form-item label="ID">
         <el-input v-model="iform.id" :disabled="true" />
       </el-form-item>
       <el-form-item label="Key">
         <el-input v-model="iform.key" :disabled="true" />
       </el-form-item>
-      <el-form-item label="负责人">
+      <el-form-item label="创建人">
         <el-input v-model="iform.author" :disabled="true" />
+      </el-form-item>
+      <el-form-item>
+        <div slot="label" style="position: relative;">
+          <div style="position: absolute;right: 0;">
+            <span>所属业务</span>
+          </div>
+          <div style="position: absolute;right: 0;padding-top: 12px;">
+            <el-tooltip effect="dark" content="在相关业务下创建审批流程，需要申请对应业务创建审批流程的权限" placement="top-start">
+              <router-link to="/approvalflow/list">
+                <span style="line-height: 10px;font-size: 10px;font-weight: 100;font-style:italic;text-decoration:underline;">(申请权限)</span>
+              </router-link>
+            </el-tooltip>
+          </div>
+        </div>
+        <el-select
+          v-model="iform.bid"
+          placeholder="请选择所属业务"
+          style="width:100%"
+        >
+          <el-option v-for="item in approvalBuisOptions" :key="item.id" :label="item.name" :value="item.id" />
+        </el-select>
       </el-form-item>
       <el-form-item label="流程名称">
         <el-input v-model="iform.name" />
@@ -48,6 +69,24 @@
           <el-option v-for="item in operatorOptions" :key="item" :value="item" />
         </el-select>
       </el-form-item>
+      <el-form-item>
+        <span slot="label">
+          驳回回调
+          <el-tooltip effect="dark" :content="callbackComment('驳回')" placement="top-start">
+            <i class="el-icon-info" />
+          </el-tooltip>
+        </span>
+        <!-- <el-select v-model="iform.fnotify.type" style="width:100%">
+          <el-option label="不回调" :value="0" />
+          <el-option label="HTTP回调" :value="1" />
+          <el-option label="TRPC回调" :value="2" />
+        </el-select>
+        <div v-if="iform.fnotify.type==1" style="margin-top: 5px;">
+          <span>回调URL</span>
+          <el-input v-model="iform.fnotify.url" style="width:60%" />
+        </div> -->
+        <approval-notify :notify="iform.fnotify" />
+      </el-form-item>
       <el-form-item label="审批流程" />
       <div>
         <div v-for="(approval,index) in iform.approvals" :key="index">
@@ -62,17 +101,17 @@
                 <el-card>
                   <el-row>
                     <el-col :span="rowLabelSpan" class="colLabel">
-                      <span>审批人员:</span>
+                      <span>审批人员</span>
                     </el-col>
                     <el-col :span="12" style="white-space:nowrap;">
-                      <el-select v-model="approval.mode" @change="handleApprovalModeChange(approval)" style="width:140px;">
+                      <el-select v-model="approval.mode" style="width:140px;" @change="handleApprovalModeChange(approval)">
                         <el-option label="Leader审批" :value="0" />
                         <el-option label="指定人员审批" :value="handleApprovalMode(approval.mode)" />
                       </el-select>
                       <span v-if="index==0" v-show="approval.mode==0" style="margin-left: 5px;font-style:italic;font-size: 11px;">*申请人的Leader</span>
                       <span v-else v-show="approval.mode==0" style="margin-left: 5px;font-style:italic;font-size: 11px;">*{{ handleFlowTitle(index-1) }}人的Leader</span>
                     </el-col>
-                    <div  v-show="approval.mode!=0" style="margin: 45px 0 0 70px;">
+                    <div v-show="approval.mode!=0" style="margin: 45px 0 0 80px;">
                       <el-col :span="12">
                         <el-select
                           v-model="approval.operators"
@@ -103,26 +142,33 @@
                   </el-row>
                   <el-row class="flowRow">
                     <el-col :span="rowLabelSpan" class="colLabel">
-                      <span>结果回调:</span>
+                      <span>通过回调
+                        <el-tooltip effect="dark" :content="callbackComment('通过')" placement="top-start">
+                          <i class="el-icon-info" />
+                        </el-tooltip>
+                      </span>
                     </el-col>
-                    <el-col :span="6">
+                    <el-col :span="12">
+                      <approval-notify :notify="approval.notify" />
+                    </el-col>
+                    <!-- <el-col :span="6">
                       <el-select v-model="approval.notify.type" style="width:140px;">
-                        <el-option label="不回调" value="0" />
-                        <el-option label="HTTP回调" value="1" />
-                        <el-option label="TRPC回调" value="2" />
+                        <el-option label="不回调" :value="0" />
+                        <el-option label="HTTP回调" :value="1" />
+                        <el-option label="TRPC回调" :value="2" />
                       </el-select>
-                    </el-col>
+                    </el-col> -->
                   </el-row>
-                  <div v-if="approval.notify.type==1">
+                  <!-- <div v-if="approval.notify.type==1">
                     <el-row class="flowRow">
                       <el-col :span="rowLabelSpan" class="colLabel">
-                        <span>回调URL:</span>
+                        <span>回调URL</span>
                       </el-col>
                       <el-col :span="12">
                         <el-input v-model="approval.notify.url" />
                       </el-col>
                     </el-row>
-                  </div>
+                  </div> -->
                 </el-card>
               </el-timeline-item>
               <el-timeline-item v-if="(index+1) !== iform.approvals.length" timestamp="0" style="display: none" />
@@ -131,7 +177,7 @@
         </div>
         <el-row class="flowRow">
           <el-col :span="24">
-            <el-button style="width:100%;border:none;background-color:#ecf5ff50" @click="addFlowNode(iform)">添加审批</el-button>
+            <el-button style="width:100%;border:none;background-color:#ecf5ff50" @click="addFlowNode(iform)">添加审批环节</el-button>
           </el-col>
         </el-row>
       </div>
@@ -149,15 +195,23 @@
 <script>
 
 import { /* newApprovalFlow, */getApprovalFlow, updateApprovalFlow } from '@/api/approval-flow'
+import { getApprovalBusiList } from '@/api/approval-business'
 import { formatFlowLevelTitle } from '@/utils/index'
+import ApprovalNotify from '@/components/ApprovalNotify'
 
 export default {
+  components: {
+    ApprovalNotify
+  },
   props: {
     form: {
       type: Object,
       default: () => {
         return {
-          name: ''
+          name: '',
+          fnotify: {
+            type: 0
+          }
         }
       }
     },
@@ -168,6 +222,7 @@ export default {
       rowLabelSpan: 1,
       approvalMode: '0',
       operatorOptions: [],
+      approvalBuisOptions: [],
       operatorOptionLoading: false,
       formLoading: true,
       iform: JSON.parse(JSON.stringify(this.form)),
@@ -175,6 +230,9 @@ export default {
     }
   },
   mounted() {
+    getApprovalBusiList().then(rsp => {
+      this.approvalBuisOptions = rsp.data.items
+    })
     if (this.iform.name === '') {
       getApprovalFlow().then(response => {
         this.iform = response.data.item
@@ -198,13 +256,15 @@ export default {
           this.iform.approvals[i].operators = ['$Leader$']
         }
       }
-
       updateApprovalFlow(this.iform).then(response => {
         this.formLoading = false
         this.form = Object.assign(this.form, this.iform)
       }).catch(() => {
         this.formLoading = false
       })
+    },
+    callbackComment(how) {
+      return '审批' + how + '时，回调通知业务后台的方式，业务后台可以根据结果做后续操作(如奖励发放、资料数据修改、终止流程等)，如果不需要，选择不回调即可'
     },
     cancelModifyFlow() {
       if (this.formLoading) {
@@ -265,7 +325,7 @@ export default {
 .colLabel {
   text-align: right;
   padding-right: 5px;
-  width: 70px;
+  width: 80px;
 }
 .colLabel span {
   line-height: 40px;

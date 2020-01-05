@@ -4,13 +4,15 @@ import { param2Obj } from '../src/utils'
 import user from './user'
 import table from './table'
 import approvalflow from './approval-flow'
+import approvalbusi from './approval-business'
 const defaultSettings = require('../src/settings.js')
 const debug = require('debug')(defaultSettings.projectName + ':mock:index')
 
 const mocks = [
   ...user,
   ...table,
-  ...approvalflow
+  ...approvalflow,
+  ...approvalbusi
 ]
 
 // for front mock 纯前端的mock方式，在入口处加载这个函数
@@ -48,8 +50,6 @@ export function mockXHR() {
       return Mock.mock(result)
     }
   }
-
-  // Mock.setup({ timeout: '3000' })
 
   for (const i of mocks) {
     Mock.mock(new RegExp(i.url), i.type || 'get', XHR2ExpressReqWrap(i.response))
