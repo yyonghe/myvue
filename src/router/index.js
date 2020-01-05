@@ -91,6 +91,35 @@ export const constantRoutes = [
   },
 
   {
+    path: '/approvalbusi/mylist',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        name: 'MyApprovalBusiList',
+        props: {
+          onlyOwn: true
+        },
+        component: () => import('@/views/table/ApprovalBusiList'),
+        meta: { title: '我的业务', icon: 'table' }
+      }
+    ]
+  },
+
+  {
+    path: '/approvalbusi/list',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        name: 'ApprovalBusiList',
+        component: () => import('@/views/table/ApprovalBusiList'),
+        meta: { title: '所有业务', icon: 'table' }
+      }
+    ]
+  },
+
+  {
     path: '/approvalflow/list',
     component: Layout,
     children: [

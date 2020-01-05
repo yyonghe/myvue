@@ -28,6 +28,18 @@ export function formatFlowLevelTitle(index) {
   return '第' + s + '级审批'
 }
 
+export function formatUsersToString(uers, delimiter) {
+  var s = ''
+  for (let i = 0; i < uers.length; i++) {
+    if (s.length === 0) {
+      s = uers[i]
+    } else {
+      s = s + delimiter + uers[i]
+    }
+  }
+  return s
+}
+
 /**
  * Parse the time to string
  * @param {(Object|string|number)} time

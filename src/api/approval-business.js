@@ -8,6 +8,14 @@ export function getApprovalBusi(params) {
   })
 }
 
+export function getApprovalBusiMyList(params) {
+  return request({
+    url: '/approvalbusi/mylist',
+    method: 'get',
+    params
+  })
+}
+
 export function getApprovalBusiList(params) {
   return request({
     url: '/approvalbusi/list',

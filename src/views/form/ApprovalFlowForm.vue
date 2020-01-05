@@ -15,7 +15,7 @@
           <div style="position: absolute;right: 0;">
             <span>所属业务</span>
           </div>
-          <div style="position: absolute;right: 0;padding-top: 12px;">
+          <div v-if="cancelVisiable==false" style="position: absolute;right: 0;padding-top: 12px;">
             <el-tooltip effect="dark" content="在相关业务下创建审批流程，需要申请对应业务创建审批流程的权限" placement="top-start">
               <router-link to="/approvalflow/list">
                 <span style="line-height: 10px;font-size: 10px;font-weight: 100;font-style:italic;text-decoration:underline;">(申请权限)</span>
@@ -25,7 +25,7 @@
         </div>
         <el-select
           v-model="iform.bid"
-          placeholder="请选择所属业务"
+          placeholder="请选择所属业务，无业务请先申请权限"
           style="width:100%"
         >
           <el-option v-for="item in approvalBuisOptions" :key="item.id" :label="item.name" :value="item.id" />

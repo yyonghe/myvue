@@ -87,7 +87,7 @@
 
 <script>
 import { getApprovalFlowList } from '@/api/approval-flow'
-import { formatFlowLevelTitle } from '@/utils/index'
+import { formatFlowLevelTitle, formatUsersToString } from '@/utils/index'
 import ApprovalFlowForm from '@/views/form/ApprovalFlowForm'
 
 export default {
@@ -127,15 +127,16 @@ export default {
       return formatFlowLevelTitle(index)
     },
     handleOperators(approval) {
-      var s = ''
-      for (let i = 0; i < approval.operators.length; i++) {
-        if (s.length === 0) {
-          s = approval.operators[i]
-        } else {
-          s = s + approval.mode + approval.operators[i]
-        }
-      }
-      return s
+      // var s = ''
+      // for (let i = 0; i < approval.operators.length; i++) {
+      //   if (s.length === 0) {
+      //     s = approval.operators[i]
+      //   } else {
+      //     s = s + approval.mode + approval.operators[i]
+      //   }
+      // }
+      // return s
+      return formatUsersToString(approval.operators, approval.mode)
     },
     formatMailto(mailto) {
       return this.handleOperators({
