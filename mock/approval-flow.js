@@ -13,7 +13,7 @@ const approvalFlowList = Mock.mock({
     name: '@cword(8,10)',                 // 流程名称 
     desc: '@cword(40, 60)',               // 流程描述
     author: '@word(5,8)',                 // 流程创建人
-    'admins|5-10': ['@word(5,8)'],        // 流程管理员，可以对流程审批环境进行修改
+    'admins|5-10': ['@word(5,8)'],        // 流程管理员，可以对流程审批环节进行修改
     'mailto|5-10': ['@word(5,8)'],        // 流程审批结果知会人员
     fnotify: {                            // 流程审批驳回通知方式配置
       type: '@integer(0, 2)'              // 审批驳回通知方式 0-不通知；1-http回调；2-trpc回调

@@ -133,6 +133,19 @@ export const constantRoutes = [
   },
 
   {
+    path: '/approvalbusi/new',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        name: 'NewApprovalBusi',
+        component: () => import('@/views/form/ApprovalBusiForm'),
+        meta: { title: '新建业务', icon: 'form' }
+      }
+    ]
+  },
+
+  {
     path: '/approvalflow/new',
     component: Layout,
     children: [

@@ -13,7 +13,7 @@ const approvalBusi = {
   isAdmin: '@integer(0, 1)',            // 是否是业务管理员
   hasAuthority: '@integer(0, 1)',       // 是否在这个业务下创建流程的权限
   author: '@word(5,8)',                 // 业务创建人
-  'admins|5-10': ['@word(5,8)'],        // 业务管理员，可以对流程审批环境进行修改
+  'admins|5-10': ['@word(5,8)'],        // 业务管理员，可以对业务信息进行修改
 }
 
 const approvalBusiList = Mock.mock({
@@ -28,7 +28,14 @@ const approvalBusiList = Mock.mock({
     isOwner: 0,                           // 是否是业务创建人
     isAdmin: 0,                           // 是否是业务管理员
     hasAuthority: '@integer(0, 1)',       // 是否在这个业务下创建流程的权限
-  }]
+  }],
+  'users|20-50': [                      // 业务用户，申请权限可以在改业务创建流程审批的用户
+    {
+      name: '@word(5,8)',
+      authorityTime: '@integer(1578290565, 1578295565)',  // 权限申请时间
+      overtime: '@integer(1578390565, 1578395565)'        // 权限过期时间
+    }
+  ]
 })
 
 export function approvalBusiId(index) {
@@ -40,6 +47,22 @@ export function approvalBusiId(index) {
 }
 
 export default [
+  {
+    url: '/approvalbusi/users',
+    type: 'get',
+    // delay: 3000,
+    response: config => {
+      var data = approvalBusiList.users
+      return {
+        code: 20000,
+        data: {
+          total: data.length,
+          items: data
+        }
+      }
+    }
+  },
+
   {
     url: '/approvalbusi/get',
     type: 'get',

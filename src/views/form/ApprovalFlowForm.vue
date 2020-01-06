@@ -17,7 +17,7 @@
           </div>
           <div v-if="cancelVisiable==false" style="position: absolute;right: 0;padding-top: 12px;">
             <el-tooltip effect="dark" content="在相关业务下创建审批流程，需要申请对应业务创建审批流程的权限" placement="top-start">
-              <router-link to="/approvalflow/list">
+              <router-link to="/approvalbusi/list">
                 <span style="line-height: 10px;font-size: 10px;font-weight: 100;font-style:italic;text-decoration:underline;">(申请权限)</span>
               </router-link>
             </el-tooltip>
@@ -25,6 +25,7 @@
         </div>
         <el-select
           v-model="iform.bid"
+          filterable
           placeholder="请选择所属业务，无业务请先申请权限"
           style="width:100%"
         >
@@ -76,15 +77,6 @@
             <i class="el-icon-info" />
           </el-tooltip>
         </span>
-        <!-- <el-select v-model="iform.fnotify.type" style="width:100%">
-          <el-option label="不回调" :value="0" />
-          <el-option label="HTTP回调" :value="1" />
-          <el-option label="TRPC回调" :value="2" />
-        </el-select>
-        <div v-if="iform.fnotify.type==1" style="margin-top: 5px;">
-          <span>回调URL</span>
-          <el-input v-model="iform.fnotify.url" style="width:60%" />
-        </div> -->
         <approval-notify :notify="iform.fnotify" />
       </el-form-item>
       <el-form-item label="审批流程" />
@@ -195,7 +187,7 @@
 <script>
 
 import { /* newApprovalFlow, */getApprovalFlow, updateApprovalFlow } from '@/api/approval-flow'
-import { getApprovalBusiList } from '@/api/approval-business'
+import { getApprovalBusiMyList } from '@/api/approval-business'
 import { formatFlowLevelTitle } from '@/utils/index'
 import ApprovalNotify from '@/components/ApprovalNotify'
 
@@ -230,12 +222,19 @@ export default {
     }
   },
   mounted() {
-    getApprovalBusiList().then(rsp => {
+    getApprovalBusiMyList().then(rsp => {
       this.approvalBuisOptions = rsp.data.items
     })
+
     if (this.iform.name === '') {
       getApprovalFlow().then(response => {
         this.iform = response.data.item
+
+
+      if(this.$route.query != null  && this.$route.query.bid != null) {
+        this.iform.bid = parseInt(this.$route.query.bid)
+      }
+
         this.formLoading = false
       }).catch(() => {
         this.formLoading = false
@@ -243,7 +242,9 @@ export default {
     } else {
       this.formLoading = false
     }
-    //
+    // if(this.$route.query != null  && this.$route.query.bid != null) {
+    //   this.iform.bid = parseInt(this.$route.query.bid)
+    // }
     // this.formLoading = false
   },
   methods: {
