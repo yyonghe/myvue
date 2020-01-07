@@ -1,15 +1,16 @@
 <template>
   <div ref="maincontainer" class="app-container">
     <div>
-      <!-- <el-row style="margin: 5px 0 5px 0;">
-        <el-col :span="22">
-          <el-input v-model="searchKey" clearable placeholder="请输入业务ID、搜索关键字" />
+      <el-row>
+        <el-col :span="4">
+          <router-link to="/approvalbusi/new">
+            <el-button type="primary" style="width: 100%">新建业务</el-button>
+          </router-link>
         </el-col>
-        <el-col :span="2">
-          <el-button plain type="primary" style="width: 100%" @click="handleSerch">搜索</el-button>
+        <el-col :span="6" :offset="14">
+          <search :on-search="handleSearchBusi" />
         </el-col>
-      </el-row> -->
-      <search :onSearch="onSearchBusi"/>
+      </el-row>
       <el-table
         v-loading="listLoading"
         :data="list"
@@ -20,14 +21,14 @@
       >
         <el-table-column align="center" label="ID" width="95">
           <template slot-scope="scope">
-            {{ scope.row.id }}
+            {{ scope.row.bid }}
           </template>
         </el-table-column>
-        <el-table-column label="Key" align="center" width="260">
+        <!-- <el-table-column label="Key" align="center" width="260">
           <template slot-scope="scope">
             {{ scope.row.key }}
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column label="业务名称" width="180">
           <template slot-scope="scope">
             <span>{{ scope.row.name }}</span>
@@ -46,14 +47,14 @@
         <el-table-column label="管理员">
           <template slot-scope="scope">
             <span class="notifier">
-              {{ formatAdmins(scope.row.admins) }}
+              {{ handleFormatAdmins(scope.row.admins) }}
             </span>
           </template>
         </el-table-column>
         <el-table-column align="center" label="操作" width="280">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.isOwner || scope.row.isAdmin" type="text">修改</el-button>
-            <el-button v-if="scope.row.isOwner || scope.row.isAdmin" type="text" @click="manageUsers(scope.row.id)">管理</el-button>
+            <el-button v-if="scope.row.isOwner || scope.row.isAdmin" type="text" @click="handleModify(scope.row)">修改</el-button>
+            <el-button v-if="scope.row.isOwner || scope.row.isAdmin" type="text" @click="handleManageUsers(scope.row.bid, 0)">管理授权用户</el-button>
             <router-link :to="{path:'/approvalflow/new',query:{bid:scope.row.id}}">
               <el-button v-if="scope.row.hasAuthority" type="text">创建审批流程</el-button>
             </router-link>
@@ -67,16 +68,26 @@
     <div style="background-color:white;position: fixed;z-index: 100;bottom: 0px">
       <el-pagination
         :current-page.sync="currentPageIndex"
-        :page-size="100"
+        :page-size="pageSize"
         layout="total, prev, pager, next"
-        :total="1000"
+        :total="listSize"
         @current-change="handleCurrentPageIndexChange"
       />
     </div>
 
-    <el-dialog title="管理业务授权用户" v-loading="busiUserDialogLoading" :before-close="beforeCloseDialog" :close-on-click-modal="false" :visible.sync="busiUserDialogVisible">
-      <search ref="search" :onSearch="onSearchUser"/>
-      <el-table :data="busiUsers" border height="620">
+    <el-dialog
+      title="修改业务信息"
+      :visible.sync="modifyDialogVisible"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :before-close="handleBeforeCloseModifyDialog"
+    >
+      <ApprovalBusiForm ref="approvalBusiForm" :cancel-visiable="true" :form="modifyingBusi" @handleCloseModifyDialog="handleCloseModifyDialog" />
+    </el-dialog>
+
+    <el-dialog title="管理业务授权用户" :before-close="handleBeforeCloseManageUserDialog" :close-on-click-modal="false" :visible.sync="busiUserDialogVisible">
+      <search ref="search" :on-search="handleSearchUser" />
+      <el-table v-loading="busiUserDialogLoading" :data="busiUsers" border height="620">
         <el-table-column align="center" label="用户名">
           <template slot-scope="scope">
             {{ scope.row.name }}
@@ -85,7 +96,6 @@
         <el-table-column align="center" label="权限申请时间">
           <template slot-scope="scope">
             {{ handleDatetime(scope.row.authorityTime) }}
-            <!-- <el-time-picker :value="new Date(scope.row.authorityTime * 1000)" type="fixed-time" placeholder="Pick a time" style="width: 100%;" /> -->
           </template>
         </el-table-column>
         <el-table-column align="center" label="权限过期时间">
@@ -101,11 +111,11 @@
         </el-table-column>
       </el-table>
       <el-pagination
-        :current-page.sync="currentPageIndex"
-        :page-size="100"
+        :current-page.sync="currentUserPageIndex"
+        :page-size="pageSize"
         layout="prev, pager, next"
-        :total="1000"
-        @current-change="handleCurrentPageIndexChange"
+        :total="busiUsersSize"
+        @current-change="handleCurrentUserPageIndexChange"
       />
     </el-dialog>
   </div>
@@ -114,50 +124,53 @@
 <script>
 import { getApprovalBusiList, getApprovalBusiMyList, getApprovalBusiUsers } from '@/api/approval-business'
 import { formatUsersToString, parseTime } from '@/utils/index'
+import ApprovalBusiForm from '@/views/form/ApprovalBusiForm'
 import Search from '@/components/Search'
 // const { body } = document
 
 export default {
   components: {
-    Search
+    Search,
+    ApprovalBusiForm
   },
   props: {
     onlyOwn: Boolean
   },
   data() {
     return {
+      pageSize: 15,
+      //
+      // searchBusiStyle: 'width: 360px;',
+      // main list
       list: null,
+      listSize: 0,
       listLoading: true,
-      searchKey: '',
-      paginationStyle: '',
       currentPageIndex: 1,
+      // manage users
       busiUsers: [],
+      manageUserBid: 0,
       busiUserDialogLoading: false,
-      busiUserDialogVisible: false
+      busiUserDialogVisible: false,
+      busiUsersSize: 0,
+      currentUserPageIndex: 1,
+      // modify busi info
+      modifyDialogVisible: false,
+      modifyingBusi: {}
     }
   },
   mounted() {
-    this.fetchData()
-
+    this.handleLoadBusiList()
     var handleWindowResize = this.handleWindowResize
-
     window.onresize = () => {
       handleWindowResize()
     }
     handleWindowResize()
   },
   methods: {
-    onSearchBusi(keyword) {
+    handleSearchBusi(keyword) {
       alert('Busi' + keyword)
     },
-    onSearchUser(keyword) {
-      alert('User' + keyword)
-    },
-    beforeCloseDialog(done) {
-      this.$refs.search.dismiss()
-      done()
-    },
-    fetchData() {
+    handleLoadBusiList() {
       this.listLoading = true
       var f
       if (this.onlyOwn) {
@@ -165,47 +178,68 @@ export default {
       } else {
         f = getApprovalBusiList
       }
-      f().then(response => {
+      var params = {
+        pageSize: this.pageSize,
+        pageIndex: this.currentPageIndex
+      }
+      f(params).then(response => {
         this.list = response.data.items
+        this.listSize = response.data.total
         this.listLoading = false
-        this.handleWindowResize()
       })
     },
-    manageUsers(bid) {
-      this.busiUsers = []
-      this.busiUserDialogLoading = true
-      this.busiUserDialogVisible = true
-      getApprovalBusiUsers().then(response => {
-        this.busiUsers = response.data.items
+    handleFormatAdmins(admins) {
+      return formatUsersToString(admins, '; ')
+    },
+    handleWindowResize() {
+    },
+    // main list funcs
+    handleCurrentPageIndexChange(index) {
+      this.handleLoadBusiList()
+    },
+    handleModify(busi) {
+      this.modifyingBusi = busi
+      this.modifyDialogVisible = true
+    },
+    handleBeforeCloseModifyDialog(done) {
+      this.$refs.approvalBusiForm.handleCancelModify()
+    },
+    handleCloseModifyDialog() {
+      this.modifyDialogVisible = false
+    },
+    // manage user funcs
+    handleManageUsers(bid, type) {
+      if (type === 0) {
+        // first time open
+        this.manageUserBid = bid
+        this.currentUserPageIndex = 1
+        this.busiUsers = []
         this.busiUserDialogVisible = true
+      }
+      this.busiUserDialogLoading = true
+      var params = {
+        bid: bid,
+        pageSize: this.pageSize,
+        pageIndex: this.currentUserPageIndex
+      }
+      getApprovalBusiUsers(params).then(response => {
+        this.busiUsers = response.data.items
+        this.busiUsersSize = response.data.total
         this.busiUserDialogLoading = false
       })
     },
-    formatAdmins(admins) {
-      return formatUsersToString(admins, '; ')
-    },
-    handleSerch() {
-      // alert(this.$refs.maincontainer.offsetHeight)
-      // alert(body.getBoundingClientRect().height)
-    },
-    handleWindowResize() {
-      // const rect = body.getBoundingClientRect()
-      // var winH = rect.height
-      // var tableH = this.$refs.maincontainer.offsetHeight
-      // var h
-      // if (tableH > winH) {
-      //   h = winH - 25
-      // } else {
-      //   h = tableH + 280
-      // }
-      // this.paginationStyle='background-color:white;position: fixed;z-index: 100;top: '+h+'px'
-      // this.paginationStyle='background-color:white;position: fixed;z-index: 100;bottom: 0px'
-    },
-    handleCurrentPageIndexChange(index) {
-      this.$message.success(index + ', ' + this.currentPageIndex + ', ' + this.paginationStyle)
-    },
     handleDatetime(datetime) {
       return parseTime(datetime)
+    },
+    handleCurrentUserPageIndexChange() {
+      this.handleManageUsers(this.manageUserBid)
+    },
+    handleSearchUser(keyword) {
+      alert('User' + keyword)
+    },
+    handleBeforeCloseManageUserDialog(done) {
+      this.$refs.search.dismiss()
+      done()
     }
   }
 }

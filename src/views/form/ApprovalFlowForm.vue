@@ -230,10 +230,9 @@ export default {
       getApprovalFlow().then(response => {
         this.iform = response.data.item
 
-
-      if(this.$route.query != null  && this.$route.query.bid != null) {
-        this.iform.bid = parseInt(this.$route.query.bid)
-      }
+        if (this.$route.query != null && this.$route.query.bid != null) {
+          this.iform.bid = parseInt(this.$route.query.bid)
+        }
 
         this.formLoading = false
       }).catch(() => {

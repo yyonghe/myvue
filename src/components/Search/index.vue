@@ -1,11 +1,11 @@
 <template>
   <div>
     <el-row style="margin: 5px 0 5px 0;">
-      <el-col :span="21">
+      <el-col :span="16">
         <el-input v-model="keyword" clearable :placeholder="placeholder" />
       </el-col>
-      <el-col :span="3">
-        <el-button plain type="primary" style="width: 100%" @click="search">{{ label }}</el-button>
+      <el-col :span="8">
+        <el-button plain type="primary" style="width: 100%;" @click="search">{{ label }}</el-button>
       </el-col>
     </el-row>
   </div>

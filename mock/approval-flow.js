@@ -1,6 +1,6 @@
 
 import Mock from 'mockjs'
-import { approvalBusiId } from './approval-business'
+import { getMyApprovalBusiIDList } from './approval-business'
 
 const defaultSettings = require('../src/settings.js')
 const debug = require('debug')(defaultSettings.projectName + ':mock:approval-flow')
@@ -9,7 +9,7 @@ const approvalFlowList = Mock.mock({
   'items|30': [{
     id: '@integer(0, 500000000)',         // 流程ID
     key: '@word(32,32)',                  // 流程对应的Key
-    bid: approvalBusiId(Mock.Random.integer(0, 4)),                // 流程对应的业务ID
+    'bid|1': [...(getMyApprovalBusiIDList())],                // 流程对应的业务ID
     name: '@cword(8,10)',                 // 流程名称 
     desc: '@cword(40, 60)',               // 流程描述
     author: '@word(5,8)',                 // 流程创建人

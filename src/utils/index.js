@@ -5,6 +5,30 @@
 const numArray = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
 
 /**
+ * Slice Array
+ * @param {Array} array
+ * @param {Number} pageIndex
+ * @param {Number} pageSize
+ */
+export function sliceArray(array, pageIndex, pageSize) {
+  if (pageSize == null || pageIndex == null) {
+    return array
+  }
+  let start = (pageIndex - 1) * pageSize
+  if (start < 0) {
+    start = 0
+  } else if (start > array.length) {
+    start = array.length
+  }
+  let end = Number(start) + Number(pageSize)
+  if (end > array.length) {
+    end = array.length
+  }
+  // console.log(pageIndex, pageSize, start, end)
+  return array.slice(start, end)
+}
+
+/**
  * Format Flow Level Title
  * @param {number} index
  */

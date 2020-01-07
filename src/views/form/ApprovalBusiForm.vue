@@ -1,12 +1,12 @@
 <template>
   <div class="app-container">
-    <el-form ref="form" v-loading="formLoading" :model="iform" label-width="95px">
+    <el-form ref="form" v-loading="loading" :model="iform" label-width="95px">
       <el-form-item label="ID">
-        <el-input v-model="iform.id" :disabled="true" />
+        <el-input v-model="iform.bid" :disabled="true" placeholder="创建后ID自动生成" />
       </el-form-item>
-      <el-form-item label="Key">
+      <!-- <el-form-item label="Key">
         <el-input v-model="iform.key" :disabled="true" />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="创建人">
         <el-input v-model="iform.author" :disabled="true" />
       </el-form-item>
@@ -24,7 +24,7 @@
           filterable
           allow-create
           placeholder="请选择"
-          :remote-method="remoteMethod"
+          :remote-method="handleRemoteGetOperators"
           :loading="operatorOptionLoading"
           value-key="name"
           style="width:100%"
@@ -33,11 +33,11 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">
+        <el-button type="primary" @click="handleModifySubmit">
           <span v-if="cancelVisiable">提交</span>
           <span v-else>创建</span>
         </el-button>
-        <el-button v-show="cancelVisiable" @click="cancelModifyFlow()">取消</el-button>
+        <el-button v-show="cancelVisiable" @click="handleCancelModify()">取消</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -45,7 +45,7 @@
 
 <script>
 
-import { /* newApprovalFlow, */getApprovalBusi/*, updateApprovalFlow*/ } from '@/api/approval-business'
+import { /* newApprovalFlow, */getApprovalBusi, updateApprovalBusi } from '@/api/approval-business'
 // import { getApprovalBusiList } from '@/api/approval-business'
 
 export default {
@@ -64,39 +64,41 @@ export default {
     return {
       operatorOptions: [],
       operatorOptionLoading: false,
-      formLoading: true,
+      loading: true,
       iform: JSON.parse(JSON.stringify(this.form))
     }
   },
   mounted() {
-    if (this.iform.name === '') {
-      getApprovalBusi().then(response => {
+    if (this.$route.query != null && this.$route.query.bid != null) {
+      getApprovalBusi({ bid: this.$route.query.bid }).then(response => {
+        this.loading = false
         this.iform = response.data.item
-        this.formLoading = false
       }).catch(() => {
-        this.formLoading = false
+        this.loading = false
       })
     } else {
-      this.formLoading = false
+      this.loading = false
     }
-    //
-    // this.formLoading = false
   },
   methods: {
-    onSubmit() {
+    handleModifySubmit() {
+      this.loading = true
+      updateApprovalBusi(this.iform).then(rsp => {
+        this.loading = false
+      })
     },
-    cancelModifyFlow() {
-      if (this.formLoading) {
+    handleCancelModify() {
+      if (this.loading) {
         this.$message({
           message: '数据处理中，请稍等...',
           duration: 1000
         })
       } else {
         this.iform = JSON.parse(JSON.stringify(this.form))
-        this.$emit('closeModifyFlow')
+        this.$emit('handleCloseModifyDialog')
       }
     },
-    remoteMethod(query) {
+    handleRemoteGetOperators(query) {
       this.operatorOptionLoading = true
       this.options = []
       this.operatorOptionLoading = false
