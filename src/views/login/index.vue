@@ -54,6 +54,7 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
+// import Layout from '@/layout'
 
 export default {
   name: 'Login',
@@ -110,6 +111,16 @@ export default {
         if (valid) {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm).then(() => {
+            // this.$router.options.routes.push({
+            //   path: 'alink2',
+            //     component: Layout,
+            //     children: [
+            //       {
+            //         path: 'https://www.baidu.com',
+            //         meta: { title: 'External Link 2', icon: 'link' }
+            //       }
+            //     ]
+            // })
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
           }).catch(() => {

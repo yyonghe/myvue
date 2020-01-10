@@ -78,6 +78,7 @@ export const constantRoutes = [
       {
         path: '',
         name: 'NewApprovalBusi',
+        hidden: true,
         component: () => import('@/views/form/ApprovalBusiForm'),
         meta: { title: '新建业务', icon: 'form' }
       }
@@ -128,7 +129,8 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
+        path: 'https://www.qq.com',
+        hidden: true,
         meta: { title: 'External Link', icon: 'link' }
       }
     ]

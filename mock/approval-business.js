@@ -5,7 +5,7 @@ const defaultSettings = require('../src/settings.js')
 const debug = require('debug')(defaultSettings.projectName + ':mock:approval-business')
 
 const approvalBusiData = Mock.mock({
-  'approvalBusiList|120': [{
+  'approvalBusiList|32': [{
     bid: '@integer(0, 500000000)',        // 业务ID
     // key: '@word(32,32)',                  // 业务对应的Key
     name: '@cword(8,10)',                 // 业务名称 
@@ -134,11 +134,15 @@ export default [
         newItem.user = []
         list.push(newItem)
       }
+      //
+      var pageSize = config.query.pageSize
+      var pageIndex = config.query.pageIndex
+      var data = sliceArray(list, pageIndex, pageSize)
       return {
         code: 20000,
         data: {
           total: list.length,
-          items: list
+          items: data
         }
       }
     }

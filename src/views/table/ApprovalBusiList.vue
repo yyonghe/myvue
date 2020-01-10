@@ -2,12 +2,12 @@
   <div ref="maincontainer" class="app-container">
     <div>
       <el-row>
-        <el-col :span="4">
+        <el-col :span="3">
           <router-link to="/approvalbusi/new">
             <el-button type="primary" style="width: 100%">新建业务</el-button>
           </router-link>
         </el-col>
-        <el-col :span="6" :offset="14">
+        <el-col :span="6" :offset="15">
           <search :on-search="handleSearchBusi" />
         </el-col>
       </el-row>
@@ -55,7 +55,7 @@
           <template slot-scope="scope">
             <el-button v-if="scope.row.isOwner || scope.row.isAdmin" type="text" @click="handleModify(scope.row)">修改</el-button>
             <el-button v-if="scope.row.isOwner || scope.row.isAdmin" type="text" @click="handleManageUsers(scope.row.bid, 0)">管理授权用户</el-button>
-            <router-link :to="{path:'/approvalflow/new',query:{bid:scope.row.id}}">
+            <router-link :to="{path:'/approvalflow/new',query:{bid:scope.row.bid}}">
               <el-button v-if="scope.row.hasAuthority" type="text">创建审批流程</el-button>
             </router-link>
             <el-tooltip effect="dark" content="申请权限后可以在这个业务下新建审批流程" placement="top-start">
@@ -87,7 +87,7 @@
 
     <el-dialog title="管理业务授权用户" :before-close="handleBeforeCloseManageUserDialog" :close-on-click-modal="false" :visible.sync="busiUserDialogVisible">
       <search ref="search" :on-search="handleSearchUser" />
-      <el-table v-loading="busiUserDialogLoading" :data="busiUsers" border height="620">
+      <el-table ref="tableUsers" v-loading="busiUserDialogLoading" :data="busiUsers" border height="620">
         <el-table-column align="center" label="用户名">
           <template slot-scope="scope">
             {{ scope.row.name }}
@@ -126,7 +126,6 @@ import { getApprovalBusiList, getApprovalBusiMyList, getApprovalBusiUsers } from
 import { formatUsersToString, parseTime } from '@/utils/index'
 import ApprovalBusiForm from '@/views/form/ApprovalBusiForm'
 import Search from '@/components/Search'
-// const { body } = document
 
 export default {
   components: {
@@ -185,6 +184,7 @@ export default {
       f(params).then(response => {
         this.list = response.data.items
         this.listSize = response.data.total
+        document.body.scrollTop = 0
         this.listLoading = false
       })
     },
@@ -225,6 +225,7 @@ export default {
       getApprovalBusiUsers(params).then(response => {
         this.busiUsers = response.data.items
         this.busiUsersSize = response.data.total
+        this.$refs.tableUsers.bodyWrapper.scrollTop =0;
         this.busiUserDialogLoading = false
       })
     },

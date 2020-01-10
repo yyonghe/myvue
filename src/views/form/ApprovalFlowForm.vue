@@ -2,10 +2,10 @@
   <div class="app-container">
     <el-form ref="form" v-loading="formLoading" :model="iform" label-width="95px">
       <el-form-item label="ID">
-        <el-input v-model="iform.id" :disabled="true" />
+        <el-input v-model="iform.id" :disabled="true" placeholder="创建后自动生成" />
       </el-form-item>
       <el-form-item label="Key">
-        <el-input v-model="iform.key" :disabled="true" />
+        <el-input v-model="iform.key" :disabled="true" placeholder="创建后自动生成" />
       </el-form-item>
       <el-form-item label="创建人">
         <el-input v-model="iform.author" :disabled="true" />
@@ -29,7 +29,7 @@
           placeholder="请选择所属业务，无业务请先申请权限"
           style="width:100%"
         >
-          <el-option v-for="item in approvalBuisOptions" :key="item.id" :label="item.name" :value="item.id" />
+          <el-option v-for="item in approvalBuisOptions" :key="item.bid" :label="item.name" :value="item.bid" />
         </el-select>
       </el-form-item>
       <el-form-item label="流程名称">
@@ -135,7 +135,7 @@
                   <el-row class="flowRow">
                     <el-col :span="rowLabelSpan" class="colLabel">
                       <span>通过回调
-                        <el-tooltip effect="dark" :content="callbackComment('通过')" placement="top-start">
+                        <el-tooltip effect="dark" :content="'本环节' + callbackComment('通过')" placement="top-start">
                           <i class="el-icon-info" />
                         </el-tooltip>
                       </span>
@@ -186,10 +186,23 @@
 
 <script>
 
-import { /* newApprovalFlow, */getApprovalFlow, updateApprovalFlow } from '@/api/approval-flow'
+import { mapGetters } from 'vuex'
+import { /* newApprovalFlow, getApprovalFlow,*/ updateApprovalFlow } from '@/api/approval-flow'
 import { getApprovalBusiMyList } from '@/api/approval-business'
 import { formatFlowLevelTitle } from '@/utils/index'
 import ApprovalNotify from '@/components/ApprovalNotify'
+
+const defaultNotify = {
+  type: 0
+}
+
+const defaultApproval = {
+  operators: [],
+  mode: 0,
+  notify: {
+    ...defaultNotify
+  }
+}
 
 export default {
   components: {
@@ -201,9 +214,17 @@ export default {
       default: () => {
         return {
           name: '',
+          admins: [],
+          mailto: [],
           fnotify: {
-            type: 0
-          }
+            ...defaultNotify
+          },
+          approvals: [
+            {
+              ...defaultApproval
+            }
+          ]
+          // ---
         }
       }
     },
@@ -221,30 +242,43 @@ export default {
       activeName: [1, 2, 3, 4, 5, 6, 7, 8, 9]
     }
   },
+  computed: {
+    ...mapGetters([
+      'name'
+    ])
+  },
   mounted() {
     getApprovalBusiMyList().then(rsp => {
       this.approvalBuisOptions = rsp.data.items
+      //
+      if (this.$route.query != null && this.$route.query.bid != null) {
+        this.form.bid = this.$route.query.bid
+        this.iform.bid = this.$route.query.bid
+      }
+      //
+      if (this.iform.author == null || this.iform.author === '') {
+        this.iform.author = this.name
+      }
+      // console.log(this.iform)
+      this.formLoading = false
     })
 
-    if (this.iform.name === '') {
-      getApprovalFlow().then(response => {
-        this.iform = response.data.item
+    // console.log(this.iform)
+    // if (this.iform.name === '') {
+    //   getApprovalFlow().then(response => {
+    //     this.iform = response.data.item
 
-        if (this.$route.query != null && this.$route.query.bid != null) {
-          this.iform.bid = parseInt(this.$route.query.bid)
-        }
+    //     if (this.$route.query != null && this.$route.query.bid != null) {
+    //       this.iform.bid = parseInt(this.$route.query.bid)
+    //     }
 
-        this.formLoading = false
-      }).catch(() => {
-        this.formLoading = false
-      })
-    } else {
-      this.formLoading = false
-    }
-    // if(this.$route.query != null  && this.$route.query.bid != null) {
-    //   this.iform.bid = parseInt(this.$route.query.bid)
+    //     this.formLoading = false
+    //   }).catch(() => {
+    //     this.formLoading = false
+    //   })
+    // } else {
+    //   this.formLoading = false
     // }
-    // this.formLoading = false
   },
   methods: {
     onSubmit() {
@@ -285,7 +319,7 @@ export default {
         operators: [],
         mode: 0,
         notify: {
-          type: '0'
+          type: 0
         }
       })
     },
@@ -315,9 +349,6 @@ export default {
 </script>
 
 <style scoped>
-.line {
-  text-align: center;
-}
 .flowRow {
   margin-top: 8px;
   vertical-align: middle;
